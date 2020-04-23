@@ -103,12 +103,11 @@ def _template_type_parse_runner(input: str, start: int) -> Tuple[TemplateType, i
     arg_start += 1  # Consume the '>'
 
     if arg_start < len(input):
-        # consume remaining items
+        # consume remaining items and append names
         arg_type, arg_end = _template_type_parse_runner(input, arg_start)
-        args.append(arg_type)
-        arg_start = _skip_whitespace(input, arg_end)
-
-    return TemplateType(input[start:name_end], args), arg_start
+        return TemplateType(input[start:name_end] + arg_type.name, args), arg_end
+    else
+        return TemplateType(input[start:name_end], args), arg_start
 
 
 def parse_template_type(input: str) -> TemplateType:
