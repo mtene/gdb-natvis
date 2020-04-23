@@ -54,7 +54,7 @@ class TemplateType:
         if (self.inner is None and other.inner is not None) or (self.inner is not None and other.inner is None):
             return False
         
-        return self.inner.matches(other.inner, matched_args)
+        return (self.inner is None and other.inner is None) or self.inner.matches(other.inner, matched_args)
 
 
 TEMPLATE_LIST_REGEX = re.compile("[<>,]")
