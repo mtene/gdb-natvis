@@ -26,7 +26,7 @@ class TemplateType:
         return self.name == "*"
 
     def __repr__(self) -> str:
-        return '<{}: {!r} [{}] -> {!r}>'.format(self.__class__.__name__, self.name, ",".join(repr(x) for x in self.args), self.inner)
+        return '<{}: {!r} [{}]> -> {!r}'.format(self.__class__.__name__, self.name, ",".join(repr(x) for x in self.args), self.inner)
 
     def __str__(self) -> str:
         if len(self.args) <= 0:
