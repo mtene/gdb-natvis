@@ -76,6 +76,44 @@ class TemplateParserTestCase(unittest.TestCase):
         self.assertTrue(vector_type.args[0].is_wildcard)
         self.assertEqual(0, len(vector_type.args[0].args))
 
+    def test_simple_list_inner_non_template(self):
+        template_type = templates.parse_template_type("test::template_class<float>::inner_class")
+
+        self.assertEqual("test::template_class", template_type.name)
+
+        self.assertEqual(1, len(template_type.args))
+
+        self.assertEqual("float", template_type.args[0].name)
+
+        self.assertEqual(0, len(template_type.args[0].args))
+
+        self.assertNotEqual(None, template_type.inner)
+
+        self.assertEqual("::inner_class", template_type.inner.name)
+
+        self.assertEqual(0, len(template_type.inner.args))
+
+    def test_simple_list_inner_simple_list(self):
+        template_type = templates.parse_template_type("test::template_class<float>::inner_class<int>")
+
+        self.assertEqual("test::template_class", template_type.name)
+
+        self.assertEqual(1, len(template_type.args))
+
+        self.assertEqual("float", template_type.args[0].name)
+
+        self.assertEqual(0, len(template_type.args[0].args))
+
+        self.assertNotEqual(None, template_type.inner)
+
+        self.assertEqual("::inner_class", template_type.inner.name)
+
+        self.assertEqual(1, len(template_type.inner.args))
+
+        self.assertEqual("int", template_type.inner.args[0].name)
+
+        self.assertEqual(0, len(template_type.inner.args[0].args))
+
     def test_missing_closing_brance(self):
         with self.assertRaises(TemplateException):
             templates.parse_template_type("test::template_class<")

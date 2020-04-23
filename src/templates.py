@@ -12,27 +12,27 @@ class TemplateException(Exception):
 
 class TemplateType:
     args: List['TemplateType']
+    inner: 'TemplateType'
 
-    def __init__(self, name: str, args=None) -> None:
+    def __init__(self, name: str, args=[], inner=None) -> None:
         super().__init__()
 
-        if args is None:
-            args = []
         self.name = name
         self.args = args
+        self.inner = inner
 
     @property
     def is_wildcard(self):
         return self.name == "*"
 
     def __repr__(self) -> str:
-        return '<{}: {!r} [{}]>'.format(self.__class__.__name__, self.name, ",".join(repr(x) for x in self.args))
+        return '<{}: {!r} [{}] -> {!r}>'.format(self.__class__.__name__, self.name, ",".join(repr(x) for x in self.args), self.inner)
 
     def __str__(self) -> str:
         if len(self.args) <= 0:
             return self.name
         else:
-            return '{}<{}>'.format(self.name, ", ".join(str(x) for x in self.args))
+            return '{}<{}>{}'.format(self.name, ", ".join(str(x) for x in self.args), str(self.inner) if self.inner is not None else '')
 
     def matches(self, other: 'TemplateType', matched_args: List[str] = None) -> bool:
         if self.is_wildcard:
@@ -48,7 +48,13 @@ class TemplateType:
             if not left.matches(right, matched_args):
                 return False
 
-        return self.name == other.name
+        if self.name != other.name:
+            return False
+        
+        if (self.inner is None and other.inner is not None) or (self.inner is not None and other.inner is None):
+            return False
+        
+        return self.inner.matches(other.inner, matched_args)
 
 
 TEMPLATE_LIST_REGEX = re.compile("[<>,]")
@@ -103,9 +109,9 @@ def _template_type_parse_runner(input: str, start: int) -> Tuple[TemplateType, i
     arg_start += 1  # Consume the '>'
 
     if arg_start < len(input):
-        # consume remaining items and append names
+        # consume remaining itemsas inner
         arg_type, arg_end = _template_type_parse_runner(input, arg_start)
-        return TemplateType(input[start:name_end] + arg_type.name, args), arg_end
+        return TemplateType(input[start:name_end], args, arg_type), arg_end
     else:
         return TemplateType(input[start:name_end], args), arg_start
 
